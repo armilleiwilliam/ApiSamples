@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+  <title>Manage users</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body style="text-align:left;">
+
+<h2>Manage users</h2>
+<form style="width:400px;">
+    <div class="form-group">
+        <br/>
+        <label for="exampleFormControlInput1">See the token</label>
+        <input type="button" class="form-control btn btn-primary" id="getToken" name="getToken" value="getToken"/>
+    </div>
+    <div class="form-group">
+        <input type="text" id="showToken" class="form-control" />
+    </div>
+    <div class="form-group">
+        <br/>
+        <label for="exampleFormControlSelect2">Update/delete user <br/>(to delete just choose an id below,
+        to update all fields are mendatory)</label>
+        <input type="text" id="userName" class="form-control" name="userName" placeholder="Name"/><br/>
+        <input type="text" id="userJob" class="form-control" name="userJob" placeholder="job"/><br/>
+        <select id="userId" class="form-control">
+            <option value="">Select a user</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+        </select>                  <br/>
+        <input type="button" id="updateUser" name="updateUser" class="btn btn-primary" value="Update User"/><br/><br/>
+        <input type="button" id="deleteUser" name="deleteUser" class="btn btn-primary" value="Delete User"/><br/><br/>
+        <input type="button" id="showUsersList" name="showUsersList" class="btn btn-primary" value="Show users list"/>
+    </div>
+    <div class="form-group">
+        <br/>
+        <label for="exampleFormControlSelect2">See results below</label>
+        <textarea class="form-control" id="updatedValues" rows="3"></textarea>
+    </div>
+</form>
+
+<script>
+
+$(document).ready(function(){
+
+    var token = "";
+
+    $("#getToken").on("click", function(){
+
+        // api request to get the token
+        $.ajax({
+           url: "https://reqres.in/api/login",
+            type: "POST",
+            data: {
+                email: "eve.holt@reqres.in",
+                password: "cityslicka"
+            },
+            success: function(response){
+                token = response['token'];
+                $('#showToken').val(token);
+                console.log(token);
+            }
+        });
+    });
+
+    // Upodate user
+    $("#updateUser").on("click", function(){
+
+        var userName = $("#userName").val();
+        var userJob = $("#userJob").val();
+        var userId = $("#userId").val();
+
+        if(userName !== "" && userJob !== "" && userId !== ""){
+
+            // api request to get the token
+            $.ajax({
+               url: "https://reqres.in/api/user/" + userId,
+                type: "PUT",
+                data: {
+                    name: userName,
+                    job: userJob
+                },
+                success: function(response){
+                    $('#updatedValues').html(
+                                        response['name'] + '\n'
+                                        + response['job'] + '\n'
+                                        + 'Updated at: ' + response['updatedAt'] + '\n\n');
+                }
+            });
+        } else {
+            alert("Each field is mendatory!");
+        }
+    });
+
+    // Delete user
+    $("#deleteUser").on("click", function(){
+
+        var userId = $("#userId").val();
+
+        if(userId !== ""){
+
+            // api request to get the token
+            $.ajax({
+               url: "https://reqres.in/api/user/" + userId,
+                type: "DELETE",
+                success: function(response){
+                    $('#updatedValues').html(response);
+                    alert('User deleted!');
+                }
+            });
+        } else {
+            alert("Select a user!");
+        }
+    });
+
+    // Get Users List
+    $("#showUsersList").on("click", function(){
+
+        var userId = $("#userIdtoDelete").val();
+
+        if(userId !== ""){
+
+            // api request to get the token
+            $.ajax({
+               url: "https://reqres.in/api/users?page=1",
+                type: "GET",
+                success: function(response){
+
+                    var listUsersDetails = "";
+                    for(var i = 0; i < response['data'].length; i++){
+
+                        listUsersDetails += (i + 1) + ') \n'
+                                        +  response['data'][i]['first_name'] + '\n'
+                                        + response['data'][i]['last_name'] + '\n'
+                                        + response['data'][i]['email'] + '\n\n';
+                    }
+                    $('#updatedValues').text(listUsersDetails);
+                }
+            });
+        } else {
+            alert("Choose an id user to delete!");
+        }
+    });
+});
+</script>
+</body>
+</html>
